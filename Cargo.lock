@@ -5,7 +5,7 @@ version = 3
 [[package]]
 name = "midia"
 version = "0.1.0"
-source = "git+https://github.com/levinion/midia#1cc189f1013605a7ef0bd66f073813c7ff4658e7"
+source = "git+https://github.com/levinion/midia#e9838d253fe21b66ade97ab3328d58689fd07feb"
 
 [[package]]
 name = "piano"
