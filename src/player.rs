@@ -1,16 +1,18 @@
-use std::{thread::sleep, time::Duration};
+use midia::{pitch::Pitch, track::MidiTrack, MidiWriter};
 
-use rodio::Sink;
-
-use crate::note::{Note, Pitch};
+use crate::note::Note;
 
 pub struct Player {
     speed: f32,
+    track: Option<MidiTrack>,
 }
 
 impl Player {
     pub fn new() -> Self {
-        Self { speed: 1. }
+        Self {
+            speed: 1.,
+            track: Some(MidiTrack::new()),
+        }
     }
 
     pub fn set_speed(mut self, speed: f32) -> Self {
@@ -18,17 +20,20 @@ impl Player {
         self
     }
 
-    pub fn play(&self, data: &str) {
+    pub fn write(&mut self, path: &str) {
+        let mut writer = MidiWriter::new(midia::TrackType::Single, 1, 60);
+        writer.add_track(self.track.take().unwrap());
+        writer.write(path);
+    }
+
+    pub fn add_notes(&mut self, data: &str) {
         let notes = Self::parse_notes(data, self.speed);
-        let (_stream, stream_handle) = rodio::OutputStream::try_default().unwrap();
-        let sink = Sink::try_new(&stream_handle).unwrap();
-        notes.iter().for_each(|note| {
-            let mut wave = note.as_wave();
-            wave.set_filter_fadeout();
-            sink.append(wave);
-        });
-        sink.sleep_until_end();
-        sleep(Duration::from_secs_f32(0.1));
+        notes.into_iter().for_each(|note| self.add_note(note));
+    }
+
+    fn add_note(&mut self, note: Note) {
+        let duration = (120. * note.duration.as_secs_f32()) as u8;
+        self.track.as_mut().unwrap().note(duration, note.pitch, 90);
     }
 
     fn parse_notes(data: &str, speed: f32) -> Vec<Note> {
