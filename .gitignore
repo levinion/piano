@@ -1,3 +1,4 @@
 /target
 .gitignore
-test.mid
+*.mid
+*.wav

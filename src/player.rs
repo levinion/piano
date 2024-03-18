@@ -1,4 +1,4 @@
-use midia::{pitch::Pitch, track::MidiTrack, MidiWriter};
+use midia::{pitch::Pitch, track::MidiTrack, typ::TrackType, MidiWriter};
 
 use crate::note::Note;
 
@@ -21,7 +21,7 @@ impl Player {
     }
 
     pub fn write(&mut self, path: &str) {
-        let mut writer = MidiWriter::new(midia::TrackType::Single, 1, 60);
+        let mut writer = MidiWriter::new(TrackType::Single, 1, 60);
         writer.add_track(self.track.take().unwrap());
         writer.write(path);
     }
@@ -32,8 +32,11 @@ impl Player {
     }
 
     fn add_note(&mut self, note: Note) {
-        let duration = (120. * note.duration.as_secs_f32()) as u8;
-        self.track.as_mut().unwrap().note(duration, note.pitch, 90);
+        self.track
+            .as_mut()
+            .take()
+            .unwrap()
+            .note(note.duration.as_secs_f32(), note.pitch, 90);
     }
 
     fn parse_notes(data: &str, speed: f32) -> Vec<Note> {
